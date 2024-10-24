@@ -20,7 +20,8 @@ public class ExtratoFinanceiro {
         this.transacoesObservableList = FXCollections.observableArrayList(controlador.listarTransacoes());
     }
 
-    public void show() {
+    @SuppressWarnings("unchecked")
+	public void show() {
         Stage extratoStage = new Stage();
         extratoStage.setTitle("Extrato Financeiro");
 

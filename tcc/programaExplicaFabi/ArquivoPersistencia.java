@@ -15,7 +15,8 @@ public class ArquivoPersistencia {
         }
     }
 
-    public List<Transacao> carregar() {
+    @SuppressWarnings("unchecked")
+	public List<Transacao> carregar() {
         List<Transacao> transacoes = new ArrayList<>();
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(NOME_ARQUIVO))) {
             transacoes = (List<Transacao>) ois.readObject();

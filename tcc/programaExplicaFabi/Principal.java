@@ -13,6 +13,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.time.LocalDate;
 
+@SuppressWarnings("unused")
 public class Principal extends Application {
     private ControladorFinanceiro controlador = new ControladorFinanceiro();
     private ObservableList<Transacao> transacoesObservableList = FXCollections.observableArrayList();
