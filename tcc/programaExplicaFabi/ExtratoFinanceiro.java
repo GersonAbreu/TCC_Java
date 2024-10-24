@@ -21,7 +21,7 @@ public class ExtratoFinanceiro {
     }
 
     @SuppressWarnings("unchecked")
-	public void show() {
+    public void show() {
         Stage extratoStage = new Stage();
         extratoStage.setTitle("Extrato Financeiro");
 
@@ -38,16 +38,34 @@ public class ExtratoFinanceiro {
         TableColumn<Transacao, String> colunaTipo = new TableColumn<>("Tipo");
         colunaTipo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().isReceita() ? "Receita" : "Despesa"));
 
+        TableColumn<Transacao, String> colunaSubcategoria = new TableColumn<>("Subcategoria");
+        colunaSubcategoria.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getSubcategoria() != null ? cellData.getValue().getSubcategoria() : ""));
+
         TableColumn<Transacao, String> colunaDescricao = new TableColumn<>("Descrição");
         colunaDescricao.setCellValueFactory(new PropertyValueFactory<>("descricao"));
 
-        tableView.getColumns().addAll(colunaValor, colunaCategoria, colunaData, colunaTipo, colunaDescricao);
+        tableView.getColumns().addAll(colunaValor, colunaCategoria, colunaData, colunaTipo, colunaSubcategoria, colunaDescricao);
         tableView.setItems(transacoesObservableList);
+
+        // Botão para excluir uma transação
+        Button btnExcluir = new Button("Excluir Transação");
+
+        btnExcluir.setOnAction(e -> {
+            Transacao transacaoSelecionada = tableView.getSelectionModel().getSelectedItem();
+            if (transacaoSelecionada != null) {
+                controlador.removerTransacao(transacaoSelecionada);
+                transacoesObservableList.remove(transacaoSelecionada);
+                controleFinanceiro.atualizarSaldo(); // Atualizar o saldo após exclusão
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Nenhuma transação selecionada para excluir!");
+                alert.show();
+            }
+        });
 
         // Calcular totais
         double totalReceitas = 0.0;
         double totalDespesas = 0.0;
-        
+
         for (Transacao transacao : transacoesObservableList) {
             if (transacao.isReceita()) {
                 totalReceitas += transacao.getValor();
@@ -55,7 +73,7 @@ public class ExtratoFinanceiro {
                 totalDespesas += transacao.getValor();
             }
         }
-        
+
         double totalGeral = totalReceitas - totalDespesas;
 
         // Labels para mostrar totais
@@ -63,18 +81,9 @@ public class ExtratoFinanceiro {
         Label labelTotalDespesas = new Label("Total Despesas: R$ " + String.format("%.2f", totalDespesas));
         Label labelTotalGeral = new Label("Total Geral: R$ " + String.format("%.2f", totalGeral));
 
-        Button btnRemover = new Button("Remover Transação Selecionada");
-        btnRemover.setOnAction(e -> {
-            Transacao transacaoSelecionada = tableView.getSelectionModel().getSelectedItem();
-            if (transacaoSelecionada != null) {
-                controlador.removerTransacao(transacaoSelecionada);
-                transacoesObservableList.remove(transacaoSelecionada);
-                controleFinanceiro.atualizarSaldo();
-            }
-        });
+        VBox vbox = new VBox(tableView, btnExcluir, labelTotalReceitas, labelTotalDespesas, labelTotalGeral);
+        Scene scene = new Scene(vbox, 600, 400);
 
-        VBox vbox = new VBox(tableView, labelTotalReceitas, labelTotalDespesas, labelTotalGeral, btnRemover);
-        Scene scene = new Scene(vbox);
         extratoStage.setScene(scene);
         extratoStage.show();
     }

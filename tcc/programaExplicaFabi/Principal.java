@@ -39,12 +39,18 @@ public class Principal extends Application {
         RadioButton rbDespesa = new RadioButton("Despesa");
         rbDespesa.setToggleGroup(group);
 
+        Label labelSubcategoria = new Label("Despesa em: ");
+        ToggleGroup subGrupo = new ToggleGroup();
+        RadioButton rbDebito = new RadioButton("Débito");
+        rbDebito.setToggleGroup(subGrupo);
+        RadioButton rbCredito = new RadioButton("Crédito");
+        rbCredito.setToggleGroup(subGrupo);
+
         Label labelDescricao = new Label("Descrição: ");
         TextField inputDescricao = new TextField();
 
         Button btnAdicionar = new Button("Adicionar Transação");
         Button btnMostrarExtrato = new Button("Mostrar Extrato");
-        //Button btnRemover = new Button("Remover Selecionada");//botão na janela controle financeiro
         labelSaldo = new Label("Saldo Atual: R$0,00");
 
         // Configurar layout
@@ -62,12 +68,32 @@ public class Principal extends Application {
         grid.add(labelTipo, 0, 3);
         grid.add(rbReceita, 1, 3);
         grid.add(rbDespesa, 2, 3);
-        grid.add(labelDescricao, 0, 4);
-        grid.add(inputDescricao, 1, 4);
-        grid.add(btnAdicionar, 1, 5);
-        grid.add(btnMostrarExtrato, 2, 5);
-        //grid.add(btnRemover, 1, 6);//Botão na janela controle financeiro
+        grid.add(labelSubcategoria, 0, 4);
+        grid.add(rbDebito, 1, 4);
+        grid.add(rbCredito, 2, 4);
+        grid.add(labelDescricao, 0, 5);
+        grid.add(inputDescricao, 1, 5);
+        grid.add(btnAdicionar, 1, 6);
+        grid.add(btnMostrarExtrato, 2, 6);
         grid.add(labelSaldo, 1, 7);
+
+        // Ocultar opções de subcategoria inicialmente
+        labelSubcategoria.setVisible(false);
+        rbDebito.setVisible(false);
+        rbCredito.setVisible(false);
+
+        // Mostrar/ocultar subcategoria com base na escolha de tipo
+        rbReceita.setOnAction(e -> {
+            labelSubcategoria.setVisible(false);
+            rbDebito.setVisible(false);
+            rbCredito.setVisible(false);
+        });
+
+        rbDespesa.setOnAction(e -> {
+            labelSubcategoria.setVisible(true);
+            rbDebito.setVisible(true);
+            rbCredito.setVisible(true);
+        });
 
         // Ação do botão adicionar
         btnAdicionar.setOnAction(e -> {
@@ -77,8 +103,13 @@ public class Principal extends Application {
                 LocalDate data = inputData.getValue();
                 boolean isReceita = rbReceita.isSelected();
                 String descricao = inputDescricao.getText();
+                String subcategoria = null;
 
-                Transacao transacao = new Transacao(valor, categoria, data, isReceita, descricao);
+                if (!isReceita) {
+                    subcategoria = rbDebito.isSelected() ? "Débito" : "Crédito";
+                }
+
+                Transacao transacao = new Transacao(valor, categoria, data, isReceita, descricao, subcategoria);
                 controlador.adicionarTransacao(transacao);
                 transacoesObservableList.add(transacao);
 
@@ -90,6 +121,7 @@ public class Principal extends Application {
                 inputCategoria.clear();
                 inputData.setValue(LocalDate.now());
                 inputDescricao.clear();
+                group.selectToggle(rbReceita); // Definir como Receita por padrão
             } catch (NumberFormatException ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Valor inválido!");
                 alert.show();
@@ -101,7 +133,7 @@ public class Principal extends Application {
 
         // Configurar e mostrar a cena
         Scene scene = new Scene(grid, 500, 300);
-        primaryStage.setTitle("Controle Financeiro Pessoal ExplicaFabi");//Nome da Janela
+        primaryStage.setTitle("Controle Financeiro Pessoal ExplicaFabi");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
